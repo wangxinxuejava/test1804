@@ -42,6 +42,22 @@
       <version>3.1.0</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>javax.servlet.jsp</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>2.2.1-b03</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>jstl</artifactId>
+      <version>1.2</version>
+    </dependency>
+
+
+
+
 
     <!--sql驱动依赖-->
     <dependency>
@@ -49,7 +65,7 @@
       <artifactId>mysql-connector-java</artifactId>
       <version>8.0.19</version>
     </dependency>
-
+<!--   日志驱动-->
 
 
     <!--   spring事务依赖-->
