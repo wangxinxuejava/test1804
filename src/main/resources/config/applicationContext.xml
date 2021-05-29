@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context
+         https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+<!--    spring配置文件,声明service,dao,工具类等对象-->
+
+
+    <context:property-placeholder location="classpath:config/jdbc.properties"></context:property-placeholder>
+
+    <!--声明数据源,德鲁伊连接池-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="url" value="${jdbc.url}"></property>
+        <property name="username" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+        <property name="maxActive" value="${jdbc.maxActive}"></property>
+    </bean>
+
+    <!--    SqlSessionFactoryBean创建SqlSessionFactory-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--        set注入德鲁伊连接池-->
+        <property name="dataSource" ref="dataSource"></property>
+
+        <property name="configLocation" value="classpath:config/mybatis.xml"></property>
+    </bean>
+
+<!--    声明mybatis扫描器-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+<!--        源码中类型是String private String sqlSessionFactoryBeanName; -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+<!--     扫描范围  -->
+        <property name="basePackage" value="com.bjpowernode.dao"/>
+    </bean>
+
+<!--    声明service的注解@Service所在的包名位置-->
+    <context:component-scan base-package="com.bjpowernode.service"/>
+
+    <!--    这个是spring自带的事务管理对象-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    <!--    开启事务扫描器
+           transaction-manager属性代表着事务管理器
+    -->
+<!--    <tx:annotation-driven transaction-manager="transactionManager"></tx:annotation-driven>-->
+
+
+
+<!--       使用Aspectj来配置事务相关属性
+           事务通知(切面)
+-->
+       <tx:advice id="buyAdvice" transaction-manager="transactionManager">
+           <tx:attributes>
+               <tx:method name="ByGoods"  propagation="REQUIRED" isolation="DEFAULT"  rollback-for="java.lang.NullPointerException,com.bjpowernode.exception.Exception_Transaction"/>
+               <tx:method name="add*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception" />
+               <tx:method name="*" propagation="SUPPORTS"></tx:method>
+           </tx:attributes>
+       </tx:advice>
+        
+<!--aop配置:通知应用的切入点-->
+    <aop:config>
+        <aop:pointcut id="servicePt" expression="execution(* *..service..*.*(..))" />
+<!--        生命增强其:通知和切入点的结合-->
+        <aop:advisor advice-ref="buyAdvice" pointcut-ref="servicePt"></aop:advisor>
+    </aop:config>
+
+</beans>
