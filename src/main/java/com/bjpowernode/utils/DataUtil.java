@@ -19,8 +19,5 @@ public class DataUtil {
        return sdf.format(date);
    }
 
-    public static void main(String[] args) {
 
-        System.out.println(getTime());
-    }
 }
