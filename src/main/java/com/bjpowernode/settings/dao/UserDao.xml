@@ -6,4 +6,17 @@
     <select id="selectUsers" resultType="com.bjpowernode.domain.User">
 
    </select>
+
+     <insert id="insertUser">
+
+     </insert>
+
+    <delete id="deleteUser">
+
+    </delete>
+
+    <update id="updateUser">
+
+    </update>
+
 </mapper>

@@ -1,5 +1,8 @@
 package com.bjpowernode.settings.domain;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class User {
     public User() {
     }
