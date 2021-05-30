@@ -1,14 +1,18 @@
 package com.bjpowernode.utils;
 
+import org.springframework.stereotype.Component;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
  * 日期工具类
  */
+@Component
 public class DataUtil {
 
     public DataUtil(){
+
     }
 
 

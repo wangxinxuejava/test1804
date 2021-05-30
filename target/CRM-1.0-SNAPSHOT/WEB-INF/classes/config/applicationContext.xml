@@ -33,11 +33,11 @@
 <!--        源码中类型是String private String sqlSessionFactoryBeanName; -->
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
 <!--     扫描范围  -->
-        <property name="basePackage" value="com.bjpowernode.dao"/>
+        <property name="basePackage" value="com.bjpowernode.settings.dao"/>
     </bean>
 
 <!--    声明service的注解@Service所在的包名位置-->
-    <context:component-scan base-package="com.bjpowernode.service"/>
+    <context:component-scan base-package="com.bjpowernode.settings.service"/>
 
     <!--    这个是spring自带的事务管理对象-->
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
