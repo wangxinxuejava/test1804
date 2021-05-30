@@ -26,4 +26,6 @@ public class UserController {
            ModelAndView mv=new ModelAndView();
            return mv;
        }
+
+
  }
