@@ -3,10 +3,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%
-String path = request.getContextPath();
-String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
-Map<String,String> pMap =(Map<String,String>) application.getAttribute("pMap");
-Set<String> set = pMap.keySet();
+String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/";
+
+	Map<String,String> pMap = (Map<String,String>)application.getAttribute("pMap");
+
+	Set<String> set = pMap.keySet();
+
 %>
 <!DOCTYPE html>
 <html>
@@ -21,74 +23,184 @@ Set<String> set = pMap.keySet();
 <script type="text/javascript" src="jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
 <script type="text/javascript" src="jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js"></script>
-<script type="text/javascript" src="jquery/bs_typeahead/bootstrap3-typeahead.min.js"></script>
-<script>
 
-	var json = {
-		<%
-			for (String key:set){
-				String value = pMap.get(key);
-		%>
-			"<%=key%>":<%=value%>,
-		<%
-			}
-		%>
-	};
-
-	// alert(json);
+	<script type="text/javascript" src="jquery/bs_typeahead/bootstrap3-typeahead.min.js"></script>
 
 
-	$(function (){
-		$(".time1").datetimepicker({
-			minView: "month",
-			language:  'zh-CN',
-			format: 'yyyy-mm-dd',
-			autoclose: true,
-			todayBtn: true,
-			pickerPosition: "bottom-left"
-		});
-		$(".time2").datetimepicker({
-			minView: "month",
-			language:  'zh-CN',
-			format: 'yyyy-mm-dd',
-			autoclose: true,
-			todayBtn: true,
-			pickerPosition: "top-left"
-		});
-		$("#create-customerName").typeahead({
-			source: function (query, process) {
-				$.post(
-						"workbench/transaction/getCustomerName.do",
-						{ "name" : query },
-						function (data) {
-							//alert(data);
-							process(data);
-						},
-						"json"
-				);
-			},
-			delay: 150
-		});
+	<script>
 
-		$("#create-stage").change(function (){
-			//取得选中的阶段
-			var stage = $("#create-stage").val();
-			// alert(stage);
-			var possibility = json[stage];
-			// alert(possibility);
-			$("#create-possibility").val(possibility);
+		var json = {
+
+			<%
+
+				for(String key:set){
+
+					String value = pMap.get(key);
+			%>
+
+					"<%=key%>" : <%=value%>,
+
+			<%
+				}
+
+			%>
+
+		};
+
+		//object Object
+		//alert(json);
+
+		/*
+
+			关于阶段和可能性
+				是一种一一对应的关系
+				一个阶段对应一个可能性
+				我们现在可以将阶段和可能性想象成是一种键值对之间的对应关系
+				以阶段为key，通过选中的阶段，触发可能性value
+
+				stage               possibility
+				key					value
+				01资质审查			10
+				02需求分析			25
+				03价值建议			40
+				...
+				...
+				07成交				100
+				08..				0
+				09..				0
+
+				对于以上的数据，通过观察得到结论
+				（1）数据量不是很大
+				（2）这是一种键值对的对应关系
+
+				如果同时满足以上两种结论，那么我们将这样的数据保存到数据库表中就没有什么意义了
+				如果遇到这种情况，我们需要用到properties属性文件来进行保存
+				stage2Possibility.properties
+				01资质审查=10
+				02需求分析=20
+				....
+
+
+				stage2Possibility.properties这个文件表示的是阶段和键值对之间的对应关系
+				将来，我们通过stage，以及对应关系，来取得可能性这个值
+				这种需求在交易模块中需要大量的使用到
+
+				所以我们就需要将该文件解析在服务器缓存中
+				application.setAttribute(stage2Possibility.properties文件内容)
+
+
+		 */
+
+
+		$(function () {
+
+			$("#create-customerName").typeahead({
+				source: function (query, process) {
+					$.get(
+							"workbench/transaction/getCustomerName.do",
+							{ "name" : query },
+							function (data) {
+								//alert(data);
+
+								/*
+
+									data
+										[{客户名称1},{2},{3}]
+
+								 */
+
+								process(data);
+							},
+							"json"
+					);
+				},
+				delay: 500
+			});
+
+
+
+			$(".time1").datetimepicker({
+				minView: "month",
+				language:  'zh-CN',
+				format: 'yyyy-mm-dd',
+				autoclose: true,
+				todayBtn: true,
+				pickerPosition: "bottom-left"
+			});
+
+			$(".time2").datetimepicker({
+				minView: "month",
+				language:  'zh-CN',
+				format: 'yyyy-mm-dd',
+				autoclose: true,
+				todayBtn: true,
+				pickerPosition: "top-left"
+			});
+
+			//为阶段的下拉框，绑定选中下拉框的事件，根据选中的阶段填写可能性
+			$("#create-stage").change(function () {
+
+				//取得选中的阶段
+				var stage = $("#create-stage").val();
+
+				/*
+
+					目标：填写可能性
+
+					阶段有了stage
+					阶段和可能性之间的对应关系pMap，但是pMap是java语言中的键值对关系（java中的map对象）
+					我们首先得将pMap转换为js中的键值对关系json
+
+					我们要做的是将pMap
+						pMap.put("01资质审查",10);
+						pMap.put("02需求分析",25);
+						...
+
+						转换为
+
+						var json = {"01资质审查":10,"02需求分析":25...};
+
+					以上我们已经将json处理好了
+
+					接下来取可能性
+
+				 */
+
+				//alert(stage);
+
+				/*
+
+					我们现在以json.key的形式不能取得value
+					因为今天的stage是一个可变的变量
+					如果是这样的key，那么我们就不能以传统的json.key的形式来取值
+					我们要使用的取值方式为
+					json[key]
+
+
+				 */
+				var possibility = json[stage];
+				//alert(possibility);
+
+				//为可能性的文本框赋值
+				$("#create-possibility").val(possibility);
+
+
+			})
+
+
+			//为保存按钮绑定事件，执行交易添加操作
+			$("#saveBtn").click(function () {
+
+				//发出传统请求，提交表单
+				$("#tranForm").submit();
+
+			})
+
+
 		})
 
-        //为保存按钮绑定事件，执行交易添加操作
-        $("#saveBtn").click(function (){
-            //发出传统请求，提交表单
-            $("#tranForm").submit();
+	</script>
 
-        })
-
-
-	})
-</script>
 </head>
 <body>
 
@@ -200,12 +312,12 @@ Set<String> set = pMap.keySet();
 		</div>
 		<hr style="position: relative; top: -40px;">
 	</div>
-	<form action="workbench/transaction/save.do" id="tranForm" method="post" class="form-horizontal" role="form"  style="position: relative; top: -30px;">
+	<form action="workbench/transaction/save.do" id="tranForm" method="post" class="form-horizontal" role="form" style="position: relative; top: -30px;">
 		<div class="form-group">
 			<label for="create-transactionOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
 			<div class="col-sm-10" style="width: 300px;">
 				<select class="form-control" id="create-transactionOwner" name="owner">
-					<option></option>
+				  <option></option>
 					<c:forEach items="${uList}" var="u">
 						<option value="${u.id}" ${user.id eq u.id ? "selected" : ""}>${u.name}</option>
 					</c:forEach>
@@ -231,15 +343,15 @@ Set<String> set = pMap.keySet();
 		<div class="form-group">
 			<label for="create-accountName" class="col-sm-2 control-label">客户名称<span style="font-size: 15px; color: red;">*</span></label>
 			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-customerName" name="customerName"  placeholder="支持自动补全，输入客户不存在则新建">
+				<input type="text" class="form-control" id="create-customerName" name="customerName" placeholder="支持自动补全，输入客户不存在则新建">
 			</div>
 			<label for="create-transactionStage" class="col-sm-2 control-label">阶段<span style="font-size: 15px; color: red;">*</span></label>
 			<div class="col-sm-10" style="width: 300px;">
 			  <select class="form-control" id="create-stage" name="stage">
 			  	<option></option>
-				  <c:forEach items="${stageList}" var="s">
-					  <option value="${s.value}">${s.text}</option>
-				  </c:forEach>
+			  	<c:forEach items="${stageList}" var="s">
+					<option value="${s.value}">${s.text}</option>
+				</c:forEach>
 			  </select>
 			</div>
 		</div>
@@ -272,16 +384,16 @@ Set<String> set = pMap.keySet();
 			</div>
 			<label for="create-activitySrc" class="col-sm-2 control-label">市场活动源&nbsp;&nbsp;<a href="javascript:void(0);" data-toggle="modal" data-target="#findMarketActivity"><span class="glyphicon glyphicon-search"></span></a></label>
 			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-activitySrc"value="动力节点CRM-P75">
-				<input type="hidden" name="activityId" value="84c5f525874244b6bd5a7c9bc73d36f9">
+				<input type="text" class="form-control" id="create-activitySrc" value="发传单1">
+				<input type="hidden" name="activityId" value="1d598ac0910a4a2ebb262b0a27eae7cc"/>
 			</div>
 		</div>
 		
 		<div class="form-group">
 			<label for="create-contactsName" class="col-sm-2 control-label">联系人名称&nbsp;&nbsp;<a href="javascript:void(0);" data-toggle="modal" data-target="#findContacts"><span class="glyphicon glyphicon-search"></span></a></label>
 			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-contactsName"value="马云">
-				<input type="hidden" name="contactsId" value="f813162a9a6445de8ceb2b6115c8a27b">
+				<input type="text" class="form-control" id="create-contactsName" value="马云">
+				<input type="hidden" name="contactsId" value="620619cd4710405aaa14c049cd071e1c"/>
 			</div>
 		</div>
 		
@@ -295,7 +407,7 @@ Set<String> set = pMap.keySet();
 		<div class="form-group">
 			<label for="create-contactSummary" class="col-sm-2 control-label">联系纪要</label>
 			<div class="col-sm-10" style="width: 70%;">
-				<textarea class="form-control" rows="3" id="create-contactSummary"name="contactSummary"></textarea>
+				<textarea class="form-control" rows="3" id="create-contactSummary" name="contactSummary"></textarea>
 			</div>
 		</div>
 		

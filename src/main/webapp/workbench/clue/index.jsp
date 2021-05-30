@@ -1,8 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%
-String path = request.getContextPath();
-String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/";
 %>
 <!DOCTYPE html>
 <html>
@@ -31,63 +30,103 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			pickerPosition: "top-left"
 		});
 
+		//为创建按钮绑定事件，打开添加操作的模态窗口
+		$("#addBtn").click(function () {
 
-		$("#addBtn").click(function(){
 			$.ajax({
-				url:"workbench/clue/getUserList.do",
-				type:"get",
-				dataType:"json",
-				success:function (data){
+
+				url : "workbench/clue/getUserList.do",
+				type : "get",
+				dataType : "json",
+				success : function (data) {
+
+					/*
+
+						data
+							[{用户1},{2},{3}]
+
+					 */
+
 					var html = "<option></option>";
-					$.each(data,function (i,n){
+
+					$.each(data,function (i,n) {
+
 						html += "<option value='"+n.id+"'>"+n.name+"</option>";
+
 					})
+
 					$("#create-owner").html(html);
-					var id ="${user.id}";
+
+					var id = "${user.id}";
+
 					$("#create-owner").val(id);
+
+					//处理完所有者下拉框数据后，打开模态窗口
 					$("#createClueModal").modal("show");
 
 				}
+
 			})
+
 		})
-		//为保存按钮添加事件，执行线索添加操作
-		$("#saveBtn").click(function (){
+
+		//为保存按钮绑定事件，执行线索添加操作
+		$("#saveBtn").click(function () {
+
 			$.ajax({
-				url:"workbench/clue/save.do",
-				data:{
-					"fullname":$.trim($("#create-fullname").val()),
-					"appellation":$.trim($("#create-appellation").val()),
-					"owner":$.trim($("#create-owner").val()),
-					"company":$.trim($("#create-company").val()),
-					"job":$.trim($("#create-job").val()),
-					"email":$.trim($("#create-email").val()),
-					"phone":$.trim($("#create-phone").val()),
-					"website":$.trim($("#create-website").val()),
-					"mphone":$.trim($("#create-mphone").val()),
-					"state":$.trim($("#create-state").val()),
-					"source":$.trim($("#create-source").val()),
-					"description":$.trim($("#create-description").val()),
-					"contactSummary":$.trim($("#create-contactSummary").val()),
-					"nextContactTime":$.trim($("#create-nextContactTime").val()),
-					"address":$.trim($("#create-address").val())
+
+				url : "workbench/clue/save.do",
+				data : {
+
+					"fullname" : $.trim($("#create-fullname").val()),
+					"appellation" : $.trim($("#create-appellation").val()),
+					"owner" : $.trim($("#create-owner").val()),
+					"company" : $.trim($("#create-company").val()),
+					"job" : $.trim($("#create-job").val()),
+					"email" : $.trim($("#create-email").val()),
+					"phone" : $.trim($("#create-phone").val()),
+					"website" : $.trim($("#create-website").val()),
+					"mphone" : $.trim($("#create-mphone").val()),
+					"state" : $.trim($("#create-state").val()),
+					"source" : $.trim($("#create-source").val()),
+					"description" : $.trim($("#create-description").val()),
+					"contactSummary" : $.trim($("#create-contactSummary").val()),
+					"nextContactTime" : $.trim($("#create-nextContactTime").val()),
+					"address" : $.trim($("#create-address").val())
+
+
 				},
-				type: "post",
-				dataType: "json",
-				success:function (data){
+				type : "post",
+				dataType : "json",
+				success : function (data) {
+
 					/*
-						data:
-						{"success":true/false}
+
+						data
+							{"success":true/false}
 
 					 */
-					if (data.success){
+
+					if(data.success){
+
+						//刷新列表 略
+
+						//关闭模态窗口
 						$("#createClueModal").modal("hide");
+
 					}else{
-						alert("线索添加失败")
+
+						alert("添加线索失败");
+
 					}
+
 				}
+
 			})
+
 		})
-		
+
+
 	});
 	
 </script>
@@ -112,6 +151,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 							<div class="col-sm-10" style="width: 300px;">
 								<select class="form-control" id="create-owner">
 
+
+
 								</select>
 							</div>
 							<label for="create-company" class="col-sm-2 control-label">公司<span style="font-size: 15px; color: red;">*</span></label>
@@ -125,9 +166,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 							<div class="col-sm-10" style="width: 300px;">
 								<select class="form-control" id="create-appellation">
 								  <option></option>
-									<c:forEach items="${appellationList}" var="a">
-										<option value="${a.value}">${a.text}</option>
-									</c:forEach>
+								  <c:forEach items="${appellationList}" var="a">
+									  <option value="${a.value}">${a.text}</option>
+								  </c:forEach>
 								</select>
 							</div>
 							<label for="create-surname" class="col-sm-2 control-label">姓名<span style="font-size: 15px; color: red;">*</span></label>
@@ -206,7 +247,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 							<div class="form-group">
 								<label for="create-nextContactTime" class="col-sm-2 control-label">下次联系时间</label>
 								<div class="col-sm-10" style="width: 300px;">
-									<input type="text" class="form-control time" id="create-nextContactTime" readonly>
+									<input type="text" class="form-control time" id="create-nextContactTime">
 								</div>
 							</div>
 						</div>
@@ -248,8 +289,10 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 						<div class="form-group">
 							<label for="edit-clueOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
-								<select class="form-control" id="edit-owner">
-
+								<select class="form-control" id="edit-clueOwner">
+								  <option>zhangsan</option>
+								  <option>lisi</option>
+								  <option>wangwu</option>
 								</select>
 							</div>
 							<label for="edit-company" class="col-sm-2 control-label">公司<span style="font-size: 15px; color: red;">*</span></label>
@@ -509,47 +552,27 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 							<td>线索状态</td>
 						</tr>
 					</thead>
-					<tbody >
+					<tbody>
 						<tr>
 							<td><input type="checkbox" /></td>
-							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='workbench/clue/detail.do?id=b6e5fd97f58a4f1e80212b1a5ca143a5';">马云先生</a></td>
-							<td>阿里巴巴</td>
-							<td>010-88888888</td>
-							<td>13888888888</td>
-							<td>合作伙伴</td>
-							<td>张三</td>
-							<td>将来联系</td>
-						</tr>
-						<tr>
-							<td><input type="checkbox" /></td>
-							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='workbench/clue/detail.do?id=798c16bbef0c48aa8799f717118ea844';">王健林先生</a></td>
-							<td>万达集团</td>
-							<td>010-66666666</td>
-							<td>13666666666</td>
-							<td>合作伙伴研讨会</td>
-							<td>张三</td>
+							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='workbench/clue/detail.do?id=464072f8e0234409981c8940c9d6a506';">马云先生</a></td>
+							<td>动力节点</td>
+							<td>010-84846003</td>
+							<td>12345678901</td>
+							<td>广告</td>
+							<td>zhangsan</td>
 							<td>已联系</td>
 						</tr>
-						<tr>
-							<td><input type="checkbox" /></td>
-							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='workbench/clue/detail.do?id=affd151bc5004b4bb7b8b9453887dc1d';">雷军先生</a></td>
-							<td>小米集团</td>
-							<td>022-88888888</td>
-							<td>18888888888</td>
-							<td>内部研讨会 </td>
-							<td>张三</td>
-							<td>已联系</td>
-						</tr>
-						<tr>
-							<td><input type="checkbox" /></td>
-							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='workbench/clue/detail.do?id=d8034b1dc14c4823bc0f70c7bafc0e64';">董明珠女士</a></td>
-							<td>格力集团</td>
-							<td>021-33333333</td>
-							<td>13333333333</td>
-							<td>公开媒介 </td>
-							<td>张三</td>
-							<td>未联系</td>
-						</tr>
+                        <tr class="active">
+                            <td><input type="checkbox" /></td>
+                            <td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='detail.jsp';">李四先生</a></td>
+                            <td>动力节点</td>
+                            <td>010-84846003</td>
+                            <td>12345678901</td>
+                            <td>广告</td>
+                            <td>zhangsan</td>
+                            <td>已联系</td>
+                        </tr>
 					</tbody>
 				</table>
 			</div>

@@ -1,7 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
-String path = request.getContextPath();
-String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/";
 %>
 <!DOCTYPE html>
 <html>
@@ -37,8 +36,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			$(this).children("a").css("color","white");
 		});
 		
-		
-		window.open("workbench/main/index.jsp","workareaFrame");
+		//在页面加载完毕后，在工作区打开相应的页面
+		window.open("workbench/main/index.html","workareaFrame");
 		
 	});
 	

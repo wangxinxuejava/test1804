@@ -1,82 +1,121 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
-    String path = request.getContextPath();
-    String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/";
 %>
 <!DOCTYPE html>
 <html>
 <head>
-    <base href="<%=basePath%>">
+	<base href="<%=basePath%>">
 <meta charset="UTF-8">
 <link href="jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
 <script type="text/javascript" src="jquery/jquery-1.11.1-min.js"></script>
 <script type="text/javascript" src="jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
-	<link rel="shortcut icon" href="#" />
-	<script>
-		//启动执行函数
-		$(function (){
 
-			if (window.top!=window){
+	<script>
+
+		$(function () {
+
+			if(window.top!=window){
 				window.top.location=window.location;
 			}
 
 			//页面加载完毕后，将用户文本框中的内容清空
 			$("#loginAct").val("");
+
 			//页面加载完毕后，让用户的文本框自动获得焦点
 			$("#loginAct").focus();
-			//为登录按钮绑定事件，执行登录操作-点击按钮
-			$("#submitBtn").on("click",function (){
+
+
+			//为登录按钮绑定事件，执行登录操作
+			$("#submitBtn").click(function () {
+
 				login();
+
 			})
-			//为登录按钮绑定事件，执行登录操作-回车提交
-		$(window).on("keydown",function (event){
-			if (event.keyCode==13){
-				login();
-			}
-		})
-		})
-		//登录账号验证
-		function login(){
-			//获取账号和密码
-            $("#msg").html("");
-			var loginAct = $("#loginAct").val();
-			var loginPwd = $("#loginPwd").val();
-			if (loginAct==""||loginPwd==""){
-				$("#msg").html("账号或密码不能为空");
-				return false;
-			}
-			$.ajax({
 
-				url:"settings/user/login.do",
-				data:{
-					"loginAct":loginAct,
-					"loginPwd":loginPwd
-				},
-				type:"post",
-				async: false,
-				dataType:"json",//这里把json改为text后，目前可执行success    2021.1.15凌晨0:32
-				success:function (data){
-					if (data.success){
-						alert("success.true");
-						window.location.href="workbench/index.html";
-					}else{
-						alert("success.false");
-						$("#msg").html(data.msg);
+			//为当前登录也窗口绑定敲键盘事件
+			//event:这个参数可以取得我们敲的是哪个键
+			$(window).keydown(function (event) {
 
-					}
-				},
-				error:function(){
-					// alert(this.success.dataType)
-					// alert("error");
-					window.location.href="workbench/index.jsp";
+				//alert(event.keyCode);
+
+				//如果取得的键位的码值为13，表示敲的是回车键
+				if(event.keyCode==13){
+
+					login();
 
 				}
 
 			})
 
+
+		})
+
+		//普通的自定义的function方法，一定要写在$(function(){})的外面
+		function login() {
+
+			//alert("登录操作123");
+
+			//验证账号密码不能为空
+			//取得账号密码
+			//将文本中的左右空格去掉，使用$.trim(文本)
+			var loginAct = $.trim($("#loginAct").val());
+			var loginPwd = $.trim($("#loginPwd").val());
+
+			if(loginAct=="" || loginPwd==""){
+
+				$("#msg").html("账号密码不能为空");
+
+				//如果账号密码为空，则需要及时强制终止该方法
+				return false;
+
+
+			}
+
+			//去后台验证登录相关操作
+			$.ajax({
+
+				url : "settings/user/login.do",
+				data : {
+
+					"loginAct" : loginAct,
+					"loginPwd" : loginPwd
+
+				},
+				type : "post",
+				dataType : "json",
+				success : function (data) {
+
+					/*
+
+						data
+							{"success":true/false,"msg":"哪错了"}
+
+					 */
+
+					//如果登录成功
+					if(data.success){
+
+						//跳转到工作台的初始也（欢迎页）
+						window.location.href = "workbench/index.jsp";
+
+					//如果登录失败
+					}else{
+
+						$("#msg").html(data.msg);
+
+					}
+
+
+				}
+
+			})
+
+
 		}
 
 	</script>
+
 </head>
 <body>
 	<div style="position: absolute; top: 0px; left: 0px; width: 60%;">
@@ -94,17 +133,24 @@
 			<form action="workbench/index.jsp" class="form-horizontal" role="form">
 				<div class="form-group form-group-lg">
 					<div style="width: 350px;">
-						<input class="form-control" type="text" placeholder="用户名"id="loginAct">
+						<input class="form-control" type="text" placeholder="用户名" id="loginAct">
 					</div>
 					<div style="width: 350px; position: relative;top: 20px;">
-						<input class="form-control" type="password" placeholder="密码"id="loginPwd">
+						<input class="form-control" type="password" placeholder="密码" id="loginPwd">
 					</div>
 					<div class="checkbox"  style="position: relative;top: 30px; left: 10px;">
 						
-							<span id="msg" style="color:red;"></span>
+							<span id="msg" style="color: red"></span>
 						
 					</div>
-					<button type="button" id="submitBtn" class="btn btn-primary btn-lg btn-block"  style="width: 350px; position: relative;top: 45px;">登录</button>
+					<!--
+
+						注意：按钮写在form表单中，默认的行为就是提交表单
+							一定要将按钮的类型设置为button
+							按钮所触发的行为应该是由我们自己手动写js代码来决定
+
+					-->
+					<button type="button" id="submitBtn" class="btn btn-primary btn-lg btn-block"  style="width: 350px; position: relative;top: 45px;">登录123</button>
 				</div>
 			</form>
 		</div>
