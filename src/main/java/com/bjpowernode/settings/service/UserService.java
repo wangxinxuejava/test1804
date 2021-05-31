@@ -6,14 +6,18 @@ import java.util.List;
 
 public interface UserService {
     //查询用户信息信息
-     List<User> selectUsers();
+    public List<User> selectUsers();
 
-     //添加用户信息
-    int insertUser(User user);
+    //用户登陆信息
+    public User loginUser(User user);
 
-    //删除用户信息
-    int deleteUser(User user);
+     public   int insertUser(User user);
 
-    //修改用户信息
-    int updateUser(User user);
+
+    public int deleteUser(User user);
+
+
+    public int updateUser(User user);
+
+
 }

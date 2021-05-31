@@ -17,6 +17,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User loginUser(User user) {
+        return null;
+    }
+
+    @Override
     public int insertUser(User user) {
         return 0;
     }
