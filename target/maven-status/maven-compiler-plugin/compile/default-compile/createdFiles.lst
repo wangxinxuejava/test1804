@@ -1,0 +1,9 @@
+com\bjpowernode\settings\service\UserService.class
+com\bjpowernode\utils\UUIDUtil.class
+com\bjpowernode\utils\SAS.class
+com\bjpowernode\settings\dao\UserDao.class
+com\bjpowernode\utils\MD5Util.class
+com\bjpowernode\settings\domain\User.class
+com\bjpowernode\utils\DataUtil.class
+com\bjpowernode\settings\web\controller\UserController.class
+com\bjpowernode\settings\service\Impl\UserServiceImpl.class
