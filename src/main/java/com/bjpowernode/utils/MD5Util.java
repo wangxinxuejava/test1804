@@ -3,7 +3,6 @@ package com.bjpowernode.utils;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-
 public class MD5Util {
 	
 	public static String getMD5(String password) {
